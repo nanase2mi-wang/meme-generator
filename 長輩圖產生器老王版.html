@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧友誼卡 · 長輩圖產生器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', system-ui, sans-serif;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f5f0e7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .app {
+            max-width: 920px;
+            width: 100%;
+            background: #fff9f0;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.1);
+            padding: 28px 28px 32px;
+            border: 1px solid #f0e0d0;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin: 0 0 8px 0;
+            font-weight: 600;
+            color: #5e3c2b;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .sub {
+            text-align: center;
+            color: #9b7b66;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .input-row label {
+            font-weight: 500;
+            color: #7b5e4a;
+            min-width: 54px;
+            font-size: 1rem;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #e7d9ce;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+            color: #3a2c22;
+        }
+        .input-row input:focus {
+            border-color: #c9a98b;
+            box-shadow: 0 0 0 4px rgba(201, 169, 139, 0.2);
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .btn-group .label {
+            font-weight: 500;
+            color: #7b5e4a;
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+        button {
+            background: #ffffff;
+            border: 2px solid #dccbbc;
+            color: #4e3a2c;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        button:hover {
+            background: #f3ebe4;
+            border-color: #b99b84;
+        }
+        button.primary {
+            background: #b99b84;
+            border-color: #b99b84;
+            color: white;
+        }
+        button.primary:hover {
+            background: #a3846b;
+            border-color: #a3846b;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+        .layout-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        .layout-bar span {
+            font-weight: 500;
+            color: #7b5e4a;
+            font-size: 1rem;
+            margin-right: 4px;
+        }
+        .pos-btn {
+            background: #ffffff;
+            border: 2px solid #dccbbc;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #4e3a2c;
+            cursor: pointer;
+        }
+        .pos-btn.active {
+            background: #b99b84;
+            border-color: #b99b84;
+            color: white;
+            box-shadow: 0 4px 10px rgba(185, 155, 132, 0.4);
+        }
+        .size-control {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: auto;
+            background: #f7f0e9;
+            padding: 4px 8px;
+            border-radius: 40px;
+        }
+        .size-control button {
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            line-height: 1;
+            border: none;
+            background: #ffffff;
+            color: #5e3c2b;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .size-control span {
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+            color: #5e3c2b;
+        }
+        /* 顏色選擇器 */
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .color-picker .label {
+            font-weight: 500;
+            color: #7b5e4a;
+            font-size: 1rem;
+            margin-right: 6px;
+        }
+        .color-swatch {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: inline-block;
+            padding: 0;
+            background: none;
+            border: 3px solid #fff;
+        }
+        .color-swatch:hover {
+            transform: scale(1.12);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .color-swatch.active {
+            border: 3px solid #4e3a2c;
+            box-shadow: 0 0 0 3px rgba(185, 155, 132, 0.6);
+            transform: scale(1.05);
+        }
+        .preview-area {
+            margin: 18px 0 22px;
+            background: #ece2d7;
+            border-radius: 24px;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background: #ddd;
+            display: block;
+            width: 100%;
+        }
+        .save-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .save-bar button {
+            background: #4e3a2c;
+            border-color: #4e3a2c;
+            color: white;
+            padding: 12px 28px;
+            font-weight: 600;
+            box-shadow: 0 6px 14px rgba(78, 58, 44, 0.25);
+        }
+        .save-bar button:hover {
+            background: #3a2a1f;
+            border-color: #3a2a1f;
+        }
+        .save-bar button.secondary {
+            background: #ffffff;
+            color: #4e3a2c;
+            border-color: #dccbbc;
+            box-shadow: none;
+        }
+        .save-bar button.secondary:hover {
+            background: #f3ebe4;
+        }
+        .hidden-file {
+            display: none;
+        }
+        .font-note {
+            font-size: 0.8rem;
+            color: #a48e7c;
+            text-align: right;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>🌸 老王的長輩圖產生器</h1>
+    <div class="sub">長輩圖產生器 · 三種抽象風格 · 清晰文字</div>
+
+    <!-- 文字輸入框 -->
+    <div class="input-group">
+        <div class="input-row">
+            <label>第一句</label>
+            <input type="text" id="line1" placeholder="例如：關於明天的事情，" value="關於明天的事情，" maxlength="40">
+        </div>
+        <div class="input-row">
+            <label>第二句</label>
+            <input type="text" id="line2" placeholder="例如：我們後天就知道了。" value="我們後天就知道了。" maxlength="40">
+        </div>
+    </div>
+
+    <!-- 圖片產生方式 + 三種風格按鈕 -->
+    <div class="btn-group">
+        <span class="label">背景</span>
+        <button id="styleAbstract" class="primary">🎲 隨機抽象</button>
+        <button id="stylePolygon">🔷 多邊形</button>
+        <button id="styleLines">〰️ 線條形</button>
+        <button id="uploadBtn">📁 上傳</button>
+        <button id="clearBtn">🗑️ 清除</button>
+        <input type="file" id="fileInput" class="hidden-file" accept="image/*">
+    </div>
+
+    <!-- 排版按鈕 + 字級控制 (預設字級60，微調10級) -->
+    <div class="layout-bar">
+        <span>文字位置</span>
+        <button id="posCenter" class="pos-btn active" data-pos="center">置中</button>
+        <button id="posBottom" class="pos-btn" data-pos="bottom">底置中</button>
+        <button id="posTop" class="pos-btn" data-pos="top">上置中</button>
+
+        <div class="size-control">
+            <button id="sizeMinusMinus">−−</button>
+            <button id="sizeMinus">−</button>
+            <span id="sizeDisplay">60 px</span>
+            <button id="sizePlus">+</button>
+            <button id="sizePlusPlus">++</button>
+        </div>
+    </div>
+
+    <!-- 字體顏色選擇器 (8種常用顏色) -->
+    <div class="color-picker">
+        <span class="label">字體顏色</span>
+        <button class="color-swatch active" data-color="#2a1e16" style="background:#2a1e16;"></button>
+        <button class="color-swatch" data-color="#FFFFFF" style="background:#FFFFFF;"></button>
+        <button class="color-swatch" data-color="#000000" style="background:#000000;"></button>
+        <button class="color-swatch" data-color="#D32F2F" style="background:#D32F2F;"></button>
+        <button class="color-swatch" data-color="#1976D2" style="background:#1976D2;"></button>
+        <button class="color-swatch" data-color="#388E3C" style="background:#388E3C;"></button>
+        <button class="color-swatch" data-color="#F57C00" style="background:#F57C00;"></button>
+        <button class="color-swatch" data-color="#7B1FA2" style="background:#7B1FA2;"></button>
+    </div>
+
+    <!-- 圖片預覽區 -->
+    <div class="preview-area">
+        <canvas id="previewCanvas" width="600" height="450"></canvas>
+    </div>
+
+    <!-- 儲存按鈕 -->
+    <div class="save-bar">
+        <button id="savePNG">⬇️ 儲存 PNG</button>
+        <button id="saveJPG">⬇️ 儲存 JPG</button>
+        <button id="copyBtn" class="secondary">📋 複製圖片</button>
+    </div>
+    <div class="font-note">字體預設：微軟正黑體 / 無襯線 · 大小可微調 ±10 級 (每級2px)</div>
+</div>
+
+<script>
+    (function() {
+        // --- DOM 元素 ---
+        const line1Input = document.getElementById('line1');
+        const line2Input = document.getElementById('line2');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const styleAbstract = document.getElementById('styleAbstract');
+        const stylePolygon = document.getElementById('stylePolygon');
+        const styleLines = document.getElementById('styleLines');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const fileInput = document.getElementById('fileInput');
+
+        const posCenterBtn = document.getElementById('posCenter');
+        const posBottomBtn = document.getElementById('posBottom');
+        const posTopBtn = document.getElementById('posTop');
+
+        const sizeMinusMinus = document.getElementById('sizeMinusMinus');
+        const sizeMinus = document.getElementById('sizeMinus');
+        const sizePlus = document.getElementById('sizePlus');
+        const sizePlusPlus = document.getElementById('sizePlusPlus');
+        const sizeDisplay = document.getElementById('sizeDisplay');
+
+        const colorSwatches = document.querySelectorAll('.color-swatch');
+
+        const savePNG = document.getElementById('savePNG');
+        const saveJPG = document.getElementById('saveJPG');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // --- 狀態 ---
+        let currentImage = null;            // 背景 Image 物件
+        let currentPos = 'center';          // 'center' | 'bottom' | 'top'
+        let baseFontSize = 60;              // 預設字級 60px (依照需求)
+        // 微調級別: -10 ~ +10 (每級 2px) → 範圍 40~80
+        let fontSizeOffset = 0;             // -10 ~ +10
+        let currentTextColor = '#2a1e16';   // 預設深咖啡色
+
+        // 固定畫布尺寸
+        const CANVAS_WIDTH = 600;
+        const CANVAS_HEIGHT = 450;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+
+        // --- 輔助函數 ---
+        function getCurrentFontSize() {
+            // 每級增減 2px： -10 => 60-20=40, 0=>60, +10=>80
+            let size = baseFontSize + (fontSizeOffset * 2);
+            return Math.min(90, Math.max(30, size)); // 安全範圍
+        }
+
+        function updateSizeDisplay() {
+            const sz = getCurrentFontSize();
+            sizeDisplay.textContent = sz + ' px';
+        }
+
+        // 清除畫布並繪製背景（若無背景則填暖色）
+        function drawBackground() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            if (currentImage && currentImage.complete && currentImage.naturalWidth > 0) {
+                const imgRatio = currentImage.width / currentImage.height;
+                const canvasRatio = CANVAS_WIDTH / CANVAS_HEIGHT;
+                let drawWidth, drawHeight, offsetX, offsetY;
+
+                if (imgRatio > canvasRatio) {
+                    drawHeight = CANVAS_HEIGHT;
+                    drawWidth = currentImage.width * (CANVAS_HEIGHT / currentImage.height);
+                    offsetX = (CANVAS_WIDTH - drawWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    drawWidth = CANVAS_WIDTH;
+                    drawHeight = currentImage.height * (CANVAS_WIDTH / currentImage.width);
+                    offsetX = 0;
+                    offsetY = (CANVAS_HEIGHT - drawHeight) / 2;
+                }
+                ctx.drawImage(currentImage, offsetX, offsetY, drawWidth, drawHeight);
+            } else {
+                ctx.fillStyle = '#e8d9cc';
+                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            }
+        }
+
+        // 繪製文字（含模糊白底，使用當前文字顏色）
+        function drawText() {
+            const text1 = line1Input.value.trim() || '';
+            const text2 = line2Input.value.trim() || '';
+
+            if (!text1 && !text2) return;
+
+            const fontSize = getCurrentFontSize();
+            ctx.font = `600 ${fontSize}px 'Microsoft JhengHei', '微軟正黑體', 'Segoe UI', 'Noto Sans TC', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const lineSpacing = fontSize * 1.4;
+            let baseY;
+
+            if (currentPos === 'center') {
+                if (text1 && text2) {
+                    baseY = CANVAS_HEIGHT / 2 - lineSpacing / 2;
+                } else {
+                    baseY = CANVAS_HEIGHT / 2;
+                }
+            } else if (currentPos === 'bottom') {
+                const bottomMargin = CANVAS_HEIGHT * 0.12;
+                if (text1 && text2) {
+                    baseY = CANVAS_HEIGHT - bottomMargin - lineSpacing;
+                } else {
+                    baseY = CANVAS_HEIGHT - bottomMargin;
+                }
+            } else { // top
+                const topMargin = CANVAS_HEIGHT * 0.12;
+                baseY = topMargin + (text1 && text2 ? lineSpacing / 2 : 0);
+                if (!text1 || !text2) {
+                    baseY = topMargin;
+                }
+            }
+
+            function drawSingleLine(text, x, y) {
+                if (!text) return;
+
+                // 白色模糊光暈底
+                ctx.save();
+                ctx.shadowColor = 'white';
+                ctx.shadowBlur = 16;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                ctx.fillStyle = 'white';
+                ctx.fillText(text, x, y);
+
+                ctx.shadowBlur = 24;
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.fillText(text, x, y);
+
+                // 主文字（使用當前選擇的顏色）
+                ctx.restore();
+                ctx.save();
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = currentTextColor;
+                ctx.fillText(text, x, y);
+                ctx.restore();
+            }
+
+            if (currentPos === 'center') {
+                if (text1 && text2) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, baseY);
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, baseY + lineSpacing);
+                } else if (text1) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                } else if (text2) {
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+                }
+            } else if (currentPos === 'bottom') {
+                if (text1 && text2) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, baseY - lineSpacing);
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, baseY);
+                } else if (text1) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, baseY);
+                } else if (text2) {
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, baseY);
+                }
+            } else { // top
+                if (text1 && text2) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, baseY);
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, baseY + lineSpacing);
+                } else if (text1) {
+                    drawSingleLine(text1, CANVAS_WIDTH / 2, baseY);
+                } else if (text2) {
+                    drawSingleLine(text2, CANVAS_WIDTH / 2, baseY);
+                }
+            }
+        }
+
+        function render() {
+            drawBackground();
+            drawText();
+        }
+
+        // --- 風格1：抽象柔和漸變 (原本的) ---
+        function generateAbstractBackground() {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = CANVAS_WIDTH;
+            offCanvas.height = CANVAS_HEIGHT;
+            const octx = offCanvas.getContext('2d');
+
+            const hue1 = Math.floor(Math.random() * 360);
+            const hue2 = (hue1 + 40 + Math.floor(Math.random() * 80)) % 360;
+            const grad = octx.createLinearGradient(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            grad.addColorStop(0, `hsl(${hue1}, 55%, 72%)`);
+            grad.addColorStop(0.5, `hsl(${hue2}, 60%, 75%)`);
+            grad.addColorStop(1, `hsl(${(hue1 + 120) % 360}, 50%, 68%)`);
+            octx.fillStyle = grad;
+            octx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            for (let i = 0; i < 28; i++) {
+                octx.beginPath();
+                const x = Math.random() * CANVAS_WIDTH;
+                const y = Math.random() * CANVAS_HEIGHT;
+                const r = Math.random() * 140 + 30;
+                const hue = (hue1 + i * 25) % 360;
+                octx.fillStyle = `hsla(${hue}, 70%, 70%, 0.25)`;
+                octx.arc(x, y, r, 0, Math.PI * 2);
+                octx.fill();
+            }
+
+            octx.lineWidth = 20;
+            for (let i = 0; i < 8; i++) {
+                octx.beginPath();
+                octx.strokeStyle = `hsla(${(hue1 + i * 45) % 360}, 60%, 80%, 0.25)`;
+                octx.moveTo(Math.random() * CANVAS_WIDTH, 0);
+                octx.bezierCurveTo(
+                    Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT,
+                    Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT,
+                    Math.random() * CANVAS_WIDTH, CANVAS_HEIGHT
+                );
+                octx.stroke();
+            }
+
+            for (let i = 0; i < 60; i++) {
+                octx.beginPath();
+                octx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.3})`;
+                octx.arc(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT, Math.random() * 3 + 1, 0, 2 * Math.PI);
+                octx.fill();
+            }
+
+            const img = new Image();
+            img.onload = () => { currentImage = img; render(); };
+            img.src = offCanvas.toDataURL('image/png');
+        }
+
+        // --- 風格2：多邊形隨機 ---
+        function generatePolygonBackground() {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = CANVAS_WIDTH;
+            offCanvas.height = CANVAS_HEIGHT;
+            const octx = offCanvas.getContext('2d');
+
+            // 基底漸層 (柔和)
+            const hueBase = Math.floor(Math.random() * 360);
+            const grad = octx.createLinearGradient(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            grad.addColorStop(0, `hsl(${hueBase}, 40%, 80%)`);
+            grad.addColorStop(1, `hsl(${(hueBase + 60) % 360}, 45%, 75%)`);
+            octx.fillStyle = grad;
+            octx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // 繪製多個半透明多邊形
+            const polygonCount = 14 + Math.floor(Math.random() * 10);
+            for (let p = 0; p < polygonCount; p++) {
+                const cx = Math.random() * CANVAS_WIDTH;
+                const cy = Math.random() * CANVAS_HEIGHT;
+                const radius = 40 + Math.random() * 120;
+                const sides = 3 + Math.floor(Math.random() * 5); // 3~7邊形
+                const rotation = Math.random() * Math.PI * 2;
+                const hue = (hueBase + p * 30) % 360;
+                const alpha = 0.25 + Math.random() * 0.3;
+
+                octx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = rotation + (i * 2 * Math.PI / sides);
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+                    if (i === 0) octx.moveTo(x, y);
+                    else octx.lineTo(x, y);
+                }
+                octx.closePath();
+                octx.fillStyle = `hsla(${hue}, 65%, 65%, ${alpha})`;
+                octx.fill();
+                // 加一點邊框
+                octx.strokeStyle = `hsla(${hue}, 50%, 50%, 0.3)`;
+                octx.lineWidth = 2;
+                octx.stroke();
+            }
+
+            // 加一些白點
+            for (let i = 0; i < 40; i++) {
+                octx.beginPath();
+                octx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.2})`;
+                octx.arc(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT, Math.random() * 3 + 1, 0, 2 * Math.PI);
+                octx.fill();
+            }
+
+            const img = new Image();
+            img.onload = () => { currentImage = img; render(); };
+            img.src = offCanvas.toDataURL('image/png');
+        }
+
+        // --- 風格3：線條形隨機 ---
+        function generateLinesBackground() {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = CANVAS_WIDTH;
+            offCanvas.height = CANVAS_HEIGHT;
+            const octx = offCanvas.getContext('2d');
+
+            // 深色或淺色基底？用淺色比較好搭配文字
+            const hueBase = Math.floor(Math.random() * 360);
+            const grad = octx.createLinearGradient(0, 0, CANVAS_WIDTH, 0);
+            grad.addColorStop(0, `hsl(${hueBase}, 30%, 85%)`);
+            grad.addColorStop(1, `hsl(${(hueBase + 180) % 360}, 35%, 80%)`);
+            octx.fillStyle = grad;
+            octx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // 繪製多條彎曲線條
+            const lineCount = 18 + Math.floor(Math.random() * 15);
+            for (let i = 0; i < lineCount; i++) {
+                octx.beginPath();
+                const hue = (hueBase + i * 25) % 360;
+                octx.strokeStyle = `hsla(${hue}, 60%, 55%, ${0.2 + Math.random() * 0.3})`;
+                octx.lineWidth = 2 + Math.random() * 8;
+                octx.lineCap = 'round';
+
+                // 隨機起點
+                const startX = Math.random() * CANVAS_WIDTH;
+                const startY = Math.random() * CANVAS_HEIGHT;
+                octx.moveTo(startX, startY);
+
+                // 用二次貝茲曲線畫出流動感
+                const cp1x = startX + (Math.random() - 0.5) * 300;
+                const cp1y = startY + (Math.random() - 0.5) * 300;
+                const endX = Math.random() * CANVAS_WIDTH;
+                const endY = Math.random() * CANVAS_HEIGHT;
+                octx.quadraticCurveTo(cp1x, cp1y, endX, endY);
+                octx.stroke();
+            }
+
+            // 加一些點綴小圓點
+            for (let i = 0; i < 30; i++) {
+                octx.beginPath();
+                octx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
+                octx.arc(Math.random() * CANVAS_WIDTH, Math.random() * CANVAS_HEIGHT, Math.random() * 4 + 1, 0, 2 * Math.PI);
+                octx.fill();
+            }
+
+            const img = new Image();
+            img.onload = () => { currentImage = img; render(); };
+            img.src = offCanvas.toDataURL('image/png');
+        }
+
+        // --- 清除背景 ---
+        function clearBackground() {
+            currentImage = null;
+            render();
+        }
+
+        // --- 上傳圖片 ---
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => { currentImage = img; render(); };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+            fileInput.value = '';
+        });
+
+        // --- 風格按鈕 ---
+        styleAbstract.addEventListener('click', () => {
+            generateAbstractBackground();
+            // 更新按鈕樣式 (隨機抽象為主按鈕風格)
+            styleAbstract.classList.add('primary');
+            stylePolygon.classList.remove('primary');
+            styleLines.classList.remove('primary');
+        });
+        stylePolygon.addEventListener('click', () => {
+            generatePolygonBackground();
+            stylePolygon.classList.add('primary');
+            styleAbstract.classList.remove('primary');
+            styleLines.classList.remove('primary');
+        });
+        styleLines.addEventListener('click', () => {
+            generateLinesBackground();
+            styleLines.classList.add('primary');
+            styleAbstract.classList.remove('primary');
+            stylePolygon.classList.remove('primary');
+        });
+
+        clearBtn.addEventListener('click', clearBackground);
+
+        // --- 文字位置切換 ---
+        function setPosition(pos) {
+            currentPos = pos;
+            [posCenterBtn, posBottomBtn, posTopBtn].forEach(btn => btn.classList.remove('active'));
+            if (pos === 'center') posCenterBtn.classList.add('active');
+            else if (pos === 'bottom') posBottomBtn.classList.add('active');
+            else if (pos === 'top') posTopBtn.classList.add('active');
+            render();
+        }
+
+        posCenterBtn.addEventListener('click', () => setPosition('center'));
+        posBottomBtn.addEventListener('click', () => setPosition('bottom'));
+        posTopBtn.addEventListener('click', () => setPosition('top'));
+
+        // --- 字級調整 (預設60，可±10級，每級2px) ---
+        function changeFontOffset(delta) {
+            let newOffset = fontSizeOffset + delta;
+            if (newOffset < -10) newOffset = -10;
+            if (newOffset > 10) newOffset = 10;
+            if (newOffset !== fontSizeOffset) {
+                fontSizeOffset = newOffset;
+                updateSizeDisplay();
+                render();
+            }
+        }
+
+        sizeMinusMinus.addEventListener('click', () => changeFontOffset(-10));
+        sizeMinus.addEventListener('click', () => changeFontOffset(-1));
+        sizePlus.addEventListener('click', () => changeFontOffset(1));
+        sizePlusPlus.addEventListener('click', () => changeFontOffset(10));
+
+        // --- 顏色選擇 ---
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                currentTextColor = swatch.dataset.color;
+                render();
+            });
+        });
+
+        // 輸入時即時渲染
+        line1Input.addEventListener('input', render);
+        line2Input.addEventListener('input', render);
+
+        // --- 儲存與複製 ---
+        function downloadImage(type, quality = 0.92) {
+            const mime = type === 'png' ? 'image/png' : 'image/jpeg';
+            const ext = type === 'png' ? 'png' : 'jpg';
+            let dataUrl;
+            if (type === 'jpeg') {
+                const tmpCanvas = document.createElement('canvas');
+                tmpCanvas.width = canvas.width;
+                tmpCanvas.height = canvas.height;
+                const tmpCtx = tmpCanvas.getContext('2d');
+                tmpCtx.fillStyle = '#FFFFFF';
+                tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+                tmpCtx.drawImage(canvas, 0, 0);
+                dataUrl = tmpCanvas.toDataURL('image/jpeg', quality);
+            } else {
+                dataUrl = canvas.toDataURL('image/png');
+            }
+
+            const link = document.createElement('a');
+            link.download = `友誼卡_${Date.now()}.${ext}`;
+            link.href = dataUrl;
+            link.click();
+        }
+
+        savePNG.addEventListener('click', () => downloadImage('png'));
+        saveJPG.addEventListener('click', () => downloadImage('jpeg', 0.9));
+
+        copyBtn.addEventListener('click', async () => {
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                if (!blob) throw new Error('無法產生圖片');
+                await navigator.clipboard.write([
+                    new ClipboardItem({ [blob.type]: blob })
+                ]);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ 已複製';
+                setTimeout(() => { copyBtn.textContent = originalText; }, 1500);
+            } catch (err) {
+                alert('複製失敗，請手動儲存圖片。' + err.message);
+            }
+        });
+
+        // --- 初始化 ---
+        function init() {
+            updateSizeDisplay();
+            // 預設使用抽象背景
+            generateAbstractBackground();
+            // 先填一個臨時背景避免空白
+            ctx.fillStyle = '#e8d9cc';
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
